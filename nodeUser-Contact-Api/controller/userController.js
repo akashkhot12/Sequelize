@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
 const register = async (req, res) => {
   try {
@@ -36,13 +36,15 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid password' });
+      return res.status(401).json({ error: "Invalid password" });
     }
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
     res.status(200).json({ token });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -50,7 +52,7 @@ const login = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  res.status(200).json({ message: 'Logout successful' });
+  res.status(200).json({ message: "Logout successful" });
 };
 
 const forgotPassword = async (req, res) => {
@@ -58,9 +60,11 @@ const forgotPassword = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
+    });
     // Here you would send the token to the user's email
     res.status(200).json({ token });
   } catch (error) {
@@ -73,8 +77,11 @@ const resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await User.update({ password: hashedPassword }, { where: { id: decoded.id } });
-    res.status(200).json({ message: 'Password reset successful' });
+    await User.update(
+      { password: hashedPassword },
+      { where: { id: decoded.id } }
+    );
+    res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -85,15 +92,15 @@ const changePassword = async (req, res) => {
     const { email, oldPassword, newPassword } = req.body;
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
     const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid old password' });
+      return res.status(401).json({ error: "Invalid old password" });
     }
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await User.update({ password: hashedPassword }, { where: { id: user.id } });
-    res.status(200).json({ message: 'Password changed successfully' });
+    res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -106,5 +113,5 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
-  changePassword
+  changePassword,
 };
